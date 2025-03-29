@@ -7,12 +7,16 @@ const app = express();
 app.use(cors());
 const cors = require("cors");
 
+const cors = require("cors");
+
 app.use(
   cors({
-    origin: "https://pandafiles.vercel.app", 
-    credentials: true, 
+    origin: "https://pandafiles.vercel.app", // Allow frontend
+    credentials: true, // Allow cookies & authentication
+    methods: "GET,POST,PUT,DELETE", // Allow specific methods
   })
 );
+
 
 app.use("/uploads", express.static("uploads"));
 
