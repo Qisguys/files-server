@@ -6,7 +6,7 @@ const connectDB = require("./config/db");
 const app = express();
 app.use(cors());
 app.use(cors({
-    origin: ["https://pandafiles-mu.vercel.app/", "http://localhost:3000"], 
+    origin: ["https://pandafiles-mu.vercel.app/", "https://pandafiles.vercel.app/login","http://localhost:3000"], 
     credentials: true
   }));
 
