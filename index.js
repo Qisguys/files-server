@@ -35,6 +35,14 @@ app.use((req, res, next) => {
   res.status(404).json({ error: "Route not found" });
 });
 
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+  res.setHeader("Access-Control-Allow-Origin", "https://pandafiles.vercel.app");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  next();
+});
+
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
   console.error("Server Error:", err);
