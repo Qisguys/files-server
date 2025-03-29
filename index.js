@@ -5,10 +5,14 @@ const connectDB = require("./config/db");
 
 const app = express();
 app.use(cors());
-app.use(cors({
-    origin: ["https://pandafiles.vercel.app", "https://pandafiles.vercel.app/login"], 
-    credentials: true
-  }));
+const cors = require("cors");
+
+app.use(
+  cors({
+    origin: "https://pandafiles.vercel.app", 
+    credentials: true, 
+  })
+);
 
 app.use("/uploads", express.static("uploads"));
 
