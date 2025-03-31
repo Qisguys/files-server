@@ -149,28 +149,14 @@ const deleteFile = async (req, res) => {
 const downloadFile = async (req, res) => {
   try {
     const { fileId } = req.params;
-    console.log(`Received download request for fileId: ${fileId}`);
-
-    // Find the file in the database
     const file = await File.findById(fileId);
+
     if (!file) {
-      console.log("❌ File not found in database.");
       return res.status(404).json({ message: "❌ File not found in database." });
     }
 
-    // Ensure file data exists
-    if (!file.data || !file.contentType) {
-      console.log("❌ File data missing in database.");
-      return res.status(404).json({ message: "❌ File data missing in database." });
-    }
-
-    console.log(`Serving file: ${file.filename} with MIME type: ${file.contentType}`);
-
-    // Set response headers
-    res.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(file.filename)}"`);
+    res.setHeader("Content-Disposition", `inline; filename=\"${file.filename}\"`);
     res.setHeader("Content-Type", file.contentType);
-
-    // Send the file data from MongoDB
     res.send(file.data);
   } catch (error) {
     console.error("Error downloading file:", error);
