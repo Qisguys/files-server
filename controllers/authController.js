@@ -150,12 +150,10 @@ const downloadFile = async (req, res) => {
     const { fileId } = req.params;
     console.log(`📥 Download request received for File ID: ${fileId}`);
 
-    // Validate ObjectId format
     if (!mongoose.Types.ObjectId.isValid(fileId)) {
       return res.status(400).json({ message: "❌ Invalid file ID format." });
     }
 
-    // Fetch file from the database
     const file = await File.findById(fileId);
     if (!file) {
       console.log("❌ File not found in database.");
@@ -164,18 +162,17 @@ const downloadFile = async (req, res) => {
 
     console.log(`✅ File found: ${file.filename}, Type: ${file.contentType}`);
 
-    // Set appropriate headers
     res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(file.filename)}"`);
     res.setHeader("Content-Type", file.contentType);
-    res.setHeader("Content-Length", file.size); // Helps browser handle large files correctly
+    res.setHeader("Content-Length", Buffer.byteLength(file.fileData));
 
-    // Send file buffer as response
-    res.status(200).send(file.fileData);
+    res.status(200).send(Buffer.from(file.fileData)); // Ensure it's properly sent as a Buffer
   } catch (error) {
     console.error("❌ Server error while downloading file:", error);
     res.status(500).json({ message: "❌ Internal server error." });
   }
 };
+
 
 
 module.exports = { googleLogin, logout, getUser, uploadAvatar,getUserFiles,deleteFile,downloadFile };
