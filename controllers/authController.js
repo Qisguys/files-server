@@ -158,13 +158,13 @@ const downloadFile = async (req, res) => {
     }
 
     // Fix path resolution
-    const filePath = path.join(__dirname, "../uploads", file.filename);
+    const filePath = path.resolve(__dirname, "../uploads", file.filename);
     console.log(`Resolved file path: ${filePath}`);
 
     // Check if file exists
     if (!fs.existsSync(filePath)) {
       console.log("❌ File not found on server.");
-      console.log("Available files:", fs.readdirSync(path.join(__dirname, "../uploads"))); // Debugging
+      console.log("Available files:", fs.readdirSync(path.resolve(__dirname, "../uploads"))); // Debugging
       return res.status(404).json({ message: "❌ File not found on server." });
     }
 
@@ -182,7 +182,6 @@ const downloadFile = async (req, res) => {
     res.status(500).json({ message: "❌ Server error while downloading file." });
   }
 };
-
 
 
 module.exports = { googleLogin, logout, getUser, uploadAvatar,getUserFiles,deleteFile,downloadFile };
