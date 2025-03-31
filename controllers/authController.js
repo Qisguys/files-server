@@ -158,7 +158,7 @@ const downloadFile = async (req, res) => {
       return res.status(404).json({ message: "❌ File not found in database." });
     }
 
-    // Check if file has data stored in MongoDB
+    // Ensure file data exists
     if (!file.data || !file.contentType) {
       console.log("❌ File data missing in database.");
       return res.status(404).json({ message: "❌ File data missing in database." });
