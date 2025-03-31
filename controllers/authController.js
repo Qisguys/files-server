@@ -145,22 +145,35 @@ const deleteFile = async (req, res) => {
   }
 };
 
-
 const downloadFile = async (req, res) => {
   try {
     const { fileId } = req.params;
-    const file = await File.findById(fileId);
+    console.log(`📥 Download request received for File ID: ${fileId}`);
 
-    if (!file) {
-      return res.status(404).json({ message: "❌ File not found in database." });
+    // Validate ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(fileId)) {
+      return res.status(400).json({ message: "❌ Invalid file ID format." });
     }
 
-    res.setHeader("Content-Disposition", `inline; filename=\"${file.filename}\"`);
+    // Fetch file from the database
+    const file = await File.findById(fileId);
+    if (!file) {
+      console.log("❌ File not found in database.");
+      return res.status(404).json({ message: "❌ File not found." });
+    }
+
+    console.log(`✅ File found: ${file.filename}, Type: ${file.contentType}`);
+
+    // Set appropriate headers
+    res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(file.filename)}"`);
     res.setHeader("Content-Type", file.contentType);
-    res.send(file.data);
+    res.setHeader("Content-Length", file.size); // Helps browser handle large files correctly
+
+    // Send file buffer as response
+    res.status(200).send(file.fileData);
   } catch (error) {
-    console.error("Error downloading file:", error);
-    res.status(500).json({ message: "❌ Server error while downloading file." });
+    console.error("❌ Server error while downloading file:", error);
+    res.status(500).json({ message: "❌ Internal server error." });
   }
 };
 
