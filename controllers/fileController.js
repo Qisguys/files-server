@@ -68,17 +68,16 @@ const deleteFile = async (req, res) => {
 
 
 //files sending for user 
-  const uploadFiles = async (req, res) => {
+const uploadFiles = async (req, res) => {
   try {
     const { userId } = req.params;
-    console.log("Received userId:", userId || "Guest Upload");
 
     if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded." });
+      return res.status(400).json({ message: "No file uploaded!" });
     }
 
     let user = null;
-    if (userId) {
+    if (userId) { // Only check if userId is provided
       user = await User.findById(userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -89,25 +88,15 @@ const deleteFile = async (req, res) => {
       filename: req.file.originalname,
       contentType: req.file.mimetype,
       size: req.file.size,
-      data: req.file.buffer,
-      user: req.user ? req.user.id : null, // Avoid error by checking if req.user exists
+      fileData: req.file.buffer,
+      user: userId || null, // Store userId only if available
     });
 
     await newFile.save();
-
-    if (user) {
-      user.files.push(newFile._id);
-      await user.save();
-    }
-
-    return res.status(201).json({
-      message: "File uploaded successfully!",
-      file: newFile,
-      user: user ? user._id : "Guest",
-    });
+    return res.status(201).json({ message: "File uploaded successfully!", fileId: newFile._id });
   } catch (error) {
-    console.error("Upload error:", error);
-    res.status(500).json({ message: "❌ Server error while uploading file." });
+    console.error("Upload Error:", error);
+    return res.status(500).json({ message: "Server error during file upload" });
   }
 };
 
