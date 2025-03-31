@@ -68,7 +68,7 @@ const deleteFile = async (req, res) => {
 
 
 //files sending for user 
-const uploadFile = async (req, res) => {
+const uploadFiles = async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded." });
