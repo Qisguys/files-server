@@ -151,32 +151,27 @@ const downloadFile = async (req, res) => {
     const { fileId } = req.params;
     console.log(`Received download request for fileId: ${fileId}`);
 
+    // Find the file in the database
     const file = await File.findById(fileId);
     if (!file) {
       console.log("❌ File not found in database.");
       return res.status(404).json({ message: "❌ File not found in database." });
     }
 
-    // Fix path resolution
-    const filePath = path.resolve(__dirname, "../uploads", file.filename);
-    console.log(`Resolved file path: ${filePath}`);
-
-    // Check if file exists
-    if (!fs.existsSync(filePath)) {
-      console.log("❌ File not found on server.");
-      console.log("Available files:", fs.readdirSync(path.resolve(__dirname, "../uploads"))); // Debugging
-      return res.status(404).json({ message: "❌ File not found on server." });
+    // Check if file has data stored in MongoDB
+    if (!file.data || !file.contentType) {
+      console.log("❌ File data missing in database.");
+      return res.status(404).json({ message: "❌ File data missing in database." });
     }
 
-    // Get correct MIME type
-    const mimeType = mime.getType(filePath) || "application/octet-stream";
-    console.log(`Serving file with MIME type: ${mimeType}`);
+    console.log(`Serving file: ${file.filename} with MIME type: ${file.contentType}`);
 
-    res.setHeader("Content-Disposition", `inline; filename=\"${encodeURIComponent(file.filename)}\"`);
-    res.setHeader("Content-Type", mimeType);
+    // Set response headers
+    res.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(file.filename)}"`);
+    res.setHeader("Content-Type", file.contentType);
 
-    const fileStream = fs.createReadStream(filePath);
-    fileStream.pipe(res);
+    // Send the file data from MongoDB
+    res.send(file.data);
   } catch (error) {
     console.error("Error downloading file:", error);
     res.status(500).json({ message: "❌ Server error while downloading file." });
