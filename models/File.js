@@ -5,8 +5,8 @@ const FileSchema = new mongoose.Schema(
     filename: { type: String, required: true },
     contentType: { type: String, required: true },
     size: { type: Number, required: true },
-    data: { type: Buffer, required: true },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null }, 
+    fileData: { type: Buffer, required: true }, // Store file as Buffer
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }
   },
   { timestamps: true }
 );
