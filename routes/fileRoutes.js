@@ -18,6 +18,7 @@ router.get("/", getFiles);
 router.get("/:filename", getFile);
 router.delete("/:filename", deleteFile);
 
-router.post("/upload/:userId?", upload.single("file"), uploadFiles);
+router.post("/upload/:userId?", authenticateUser, upload.single("file"), uploadFiles);
+
 
 module.exports = router;
