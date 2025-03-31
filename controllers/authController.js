@@ -172,7 +172,7 @@ const downloadFile = async (req, res) => {
     const mimeType = mime.getType(filePath) || "application/octet-stream";
     console.log(`Serving file with MIME type: ${mimeType}`);
 
-    res.setHeader("Content-Disposition", `inline; filename="${encodeURIComponent(file.filename)}"`);
+    res.setHeader("Content-Disposition", `inline; filename=\"${encodeURIComponent(file.filename)}\"`);
     res.setHeader("Content-Type", mimeType);
 
     const fileStream = fs.createReadStream(filePath);
@@ -182,6 +182,7 @@ const downloadFile = async (req, res) => {
     res.status(500).json({ message: "❌ Server error while downloading file." });
   }
 };
+
 
 
 module.exports = { googleLogin, logout, getUser, uploadAvatar,getUserFiles,deleteFile,downloadFile };
