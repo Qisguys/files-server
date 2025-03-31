@@ -4,7 +4,7 @@ const User = require("../models/User");
 const File = require("../models/File");
 const path = require("path");
 const fs = require("fs");
-
+const mime = require("mime"); 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -145,6 +145,7 @@ const deleteFile = async (req, res) => {
   }
 };
 
+
 const downloadFile = async (req, res) => {
   try {
     const { fileId } = req.params;
@@ -164,9 +165,12 @@ const downloadFile = async (req, res) => {
       return res.status(404).json({ message: "❌ File not found on server." });
     }
 
-    console.log("✅ File found, starting download...");
-    res.setHeader("Content-Disposition", `attachment; filename=${file.filename}`);
-    res.setHeader("Content-Type", "application/octet-stream");
+    // Detect file type
+    const mimeType = mime.getType(filePath) || "application/octet-stream";
+    console.log(`Serving file with MIME type: ${mimeType}`);
+
+    res.setHeader("Content-Disposition", `inline; filename="${file.filename}"`);
+    res.setHeader("Content-Type", mimeType);
 
     const fileStream = fs.createReadStream(filePath);
     fileStream.pipe(res);
@@ -175,6 +179,7 @@ const downloadFile = async (req, res) => {
     res.status(500).json({ message: "❌ Server error while downloading file." });
   }
 };
+
 
 
 module.exports = { googleLogin, logout, getUser, uploadAvatar,getUserFiles,deleteFile,downloadFile };
