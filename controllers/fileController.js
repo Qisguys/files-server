@@ -68,7 +68,7 @@ const deleteFile = async (req, res) => {
 
 
 //files sending for user 
-const uploadFiles = async (req, res) => {
+  const uploadFiles = async (req, res) => {
   try {
     const { userId } = req.params;
     console.log("Received userId:", userId || "Guest Upload");
@@ -78,7 +78,6 @@ const uploadFiles = async (req, res) => {
     }
 
     let user = null;
-
     if (userId) {
       user = await User.findById(userId);
       if (!user) {
@@ -90,8 +89,8 @@ const uploadFiles = async (req, res) => {
       filename: req.file.originalname,
       contentType: req.file.mimetype,
       size: req.file.size,
-      data: req.file.buffer, // Store file as binary data
-      user: userId || null, // Use userId only if provided
+      data: req.file.buffer,
+      user: req.user ? req.user.id : null, // Avoid error by checking if req.user exists
     });
 
     await newFile.save();
@@ -102,12 +101,12 @@ const uploadFiles = async (req, res) => {
     }
 
     return res.status(201).json({
-      message: "✅ File uploaded successfully!",
+      message: "File uploaded successfully!",
       file: newFile,
       user: user ? user._id : "Guest",
     });
   } catch (error) {
-    console.error("❌ Upload error:", error);
+    console.error("Upload error:", error);
     res.status(500).json({ message: "❌ Server error while uploading file." });
   }
 };
