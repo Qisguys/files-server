@@ -93,6 +93,17 @@ const uploadFiles = async (req, res) => {
     });
 
     await newFile.save();
+    
+     if (user) {
+      user.files.push(newFile._id);
+      await user.save();
+    }
+
+    return res.status(201).json({
+      message: "File uploaded successfully!",
+      file: newFile,
+      user: user ? user._id : "Guest",
+    });
     return res.status(201).json({ message: "File uploaded successfully!", fileId: newFile._id });
   } catch (error) {
     console.error("Upload Error:", error);
