@@ -13,7 +13,7 @@ connectDB();
 // ✅ CORS Configuration (Only keep one)
 app.use(
   cors({
-    origin: "https://pandafiles.vercel.app", // ✅ Ensure this is your actual frontend URL
+    origin: process.env.FRONTEND_URL || "http://localhost:3000", // ✅ Use environment variable for frontend URL
     credentials: true, // ✅ Allow cookies & authorization headers
   })
 );
@@ -50,34 +50,32 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Internal Server Error" });
 });
 
-const VAPID_KEYS = webpush.generateVAPIDKeys(); // Run once and save!
-console.log("VAPID PUBLIC:", VAPID_KEYS.publicKey);
-console.log("VAPID PRIVATE:", VAPID_KEYS.privateKey);
-
-// Or paste here if you saved earlier
+// ✅ VAPID Key Setup
 webpush.setVapidDetails(
-  "mailto:test@example.com",
-  VAPID_KEYS.publicKey,
-  VAPID_KEYS.privateKey
+  "mailto:" + process.env.VAPID_EMAIL, // Use VAPID email from env
+  process.env.VAPID_PUBLIC_KEY,       // Public Key from .env
+  process.env.VAPID_PRIVATE_KEY      // Private Key from .env
 );
 
 let subscriptions = [];
 
+// ✅ Save subscription
 app.post("/subscribe", (req, res) => {
   const subscription = req.body;
   subscriptions.push(subscription);
   res.status(201).json({ message: "Subscribed successfully!" });
 });
 
+// ✅ Send Notification to all subscriptions
 app.get("/send", async (req, res) => {
   const notificationPayload = {
     title: "🔔 Panda Files Update!",
     body: "New features just dropped. Check them out!",
-    url: "https://yourdomain.com/dashboard",
+    url: "https://pandafiles.vercel.app", // Make sure you provide full URL
   };
 
   const sendPromises = subscriptions.map((sub) =>
-    webpush.sendNotification(sub, JSON.stringify(notificationPayload)).catch(err => {
+    webpush.sendNotification(sub, JSON.stringify(notificationPayload)).catch((err) => {
       console.error("Send error:", err);
     })
   );
