@@ -2,6 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/db");
+const webpush = require("web-push");
+const bodyParser = require("body-parser");
 
 const app = express();
 
@@ -46,6 +48,42 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   console.error("Server Error:", err);
   res.status(500).json({ error: "Internal Server Error" });
+});
+
+const VAPID_KEYS = webpush.generateVAPIDKeys(); // Run once and save!
+console.log("VAPID PUBLIC:", VAPID_KEYS.publicKey);
+console.log("VAPID PRIVATE:", VAPID_KEYS.privateKey);
+
+// Or paste here if you saved earlier
+webpush.setVapidDetails(
+  "mailto:test@example.com",
+  VAPID_KEYS.publicKey,
+  VAPID_KEYS.privateKey
+);
+
+let subscriptions = [];
+
+app.post("/subscribe", (req, res) => {
+  const subscription = req.body;
+  subscriptions.push(subscription);
+  res.status(201).json({ message: "Subscribed successfully!" });
+});
+
+app.get("/send", async (req, res) => {
+  const notificationPayload = {
+    title: "🔔 Panda Files Update!",
+    body: "New features just dropped. Check them out!",
+    url: "https://yourdomain.com/dashboard",
+  };
+
+  const sendPromises = subscriptions.map((sub) =>
+    webpush.sendNotification(sub, JSON.stringify(notificationPayload)).catch(err => {
+      console.error("Send error:", err);
+    })
+  );
+
+  await Promise.all(sendPromises);
+  res.status(200).json({ message: "Notifications sent" });
 });
 
 // ✅ Start Server
